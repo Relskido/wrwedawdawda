@@ -589,25 +589,17 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 local function TweenToTarget(targetPosition, duration)
-	local character = game.Players.LocalPlayer.Character
+	local character = Players.LocalPlayer.Character
 	if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-
-	local targetChar = targetPlayer.LocalPlayer.Character
-	if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then return end
-
 	local hrp = character.HumanoidRootPart
-	local targetHRP = targetChar.HumanoidRootPart
 
-	local tweenInfo = TweenInfo.new(
-		duration,
-		Enum.EasingStyle.Linear
-	)
-
-	local goal = {CFrame = CFrame.new(targetHRP.Position + Vector3.new(0, 3, 0))} -- move slightly above
+	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+	local goal = {CFrame = CFrame.new(targetPosition + Vector3.new(0, 3, 0))}
 	local tween = TweenService:Create(hrp, tweenInfo, goal)
 	tween:Play()
 	tween.Completed:Wait()
 end
+
 
 local function pickRandomPlayer()
 	if #AllPlayers == 0 then return nil end
@@ -628,32 +620,21 @@ local function LoadEnemy(Chars, Folder)
 	return BasePart
 end
 
-local function EquipItem(Melee, Sword, Gun)
+local function EquipItem(MeleeName, SwordName, GunName)
 	local Backpack = Players.LocalPlayer.Backpack
 	local Character = Players.LocalPlayer.Character
-	local Equipped = Character:FindFirstChildOfClass("Tool")
 
-	for i, v in pairs(Backpack:GetChildren()) do
-		while true do
-			if v == Melee.Name and Config.Godhuman.InCooldown == false then
-				Melee.Parent = Character
-			end
-
-			wait(Config["Cursed Dual Katana"].EquipTime)
-
-			if v == Sword.Name and Config["Cursed Dual Katana"].InCooldown == false then
-				Sword.Parent = Character
-			end
-
-			wait(Config["Skull Guitar"].EquipTime)
-
-			if v == Gun.Name and Config["Skull Guitar"].InCooldown == false then
-				Gun.Parent = Character
-			end
-
-			wait(Config.Godhuman.EquipTime)
+	local function equip(toolName)
+		local tool = Backpack:FindFirstChild(toolName)
+		if tool then
+			tool.Parent = Character
+			task.wait(Config[toolName] and Config[toolName].EquipTime or 0.2)
 		end
 	end
+
+	equip(MeleeName)
+	equip(SwordName)
+	equip(GunName)
 end
 
 local function Attack()
@@ -669,8 +650,8 @@ local function Attack()
 
 	AttackingPlayer[Players.LocalPlayer] = enemyChar
 
-	TweenToTarget(Enemy.Position, 0.3)
-	EquipItem("GodHuman", "Curse Dual Katana", "Skull Guitar")
+	TweenToTarget(Enemy.Position, 0.3)	
+	EquipItem("GodHuman", "Cursed Dual Katana", "Skull Guitar")
 
 	if Equipped then
 		if #AllPlayers > 0 then
