@@ -705,4 +705,6 @@ function Start()
 	end)
 end
 
+Start()
+
 return G2L["1"], require;
